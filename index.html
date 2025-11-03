@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TianYaoCelestian's physics world</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #e2e8f0;
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        padding: 20px;
+    }
+    
+    .container {
+        display: flex;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        background: #1e293b;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        min-height: 80vh;
+        border: 1px solid #334155;
+    }
+    
+    .directory {
+        width: 40%;
+        background: #83aae8;
+        border-right: 1px solid #699be2;
+        padding: 30px 20px;
+        overflow-y: auto;
+    }
+    
+    .content-area {
+        width: 60%;
+        padding: 40px;
+        background: #5f92e3;
+        overflow-y: auto;
+    }
+    
+    h1 {
+        color: #ffffff;
+        font-size: 2.2rem;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #334155;
+    }
+    
+    .main-titles {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .title-item {
+        padding: 15px 20px;
+        background: #283548;
+        border: 1px solid #273445;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .title-item:hover {
+        background: #475569;
+        transform: translateX(5px);
+        border-color: #60a5fa;
+    }
+    
+    .title-item.active {
+        background: #3b82f6;
+        border-color: #60a5fa;
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+    
+    .title-item .arrow {
+        transition: transform 0.3s;
+        color: #ffffff;
+    }
+    
+    .title-item.active .arrow {
+        transform: rotate(90deg);
+        color: #ffffff;
+    }
+    
+    .sub-titles {
+        margin-left: 20px;
+        margin-top: 10px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+        overflow-y: auto;
+    }
+    
+    .sub-titles.expanded {
+        /* 高度由JavaScript动态计算 */
+    }
+    
+    .sub-item {
+        padding: 12px 15px;
+        background: #334155;
+        border: 1px solid #475569;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 500;
+        color: #cbd5e1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .sub-item:hover {
+        background: #475569;
+        transform: translateX(5px);
+        border-color: #60a5fa;
+    }
+    
+    .sub-item.active {
+        background: #3b82f6;
+        border-color: #60a5fa;
+        color: #e2e8f0;
+        font-weight: 600;
+    }
+    
+    .leaf-item {
+        padding: 10px 15px 10px 30px;
+        background: #334155;
+        border: 1px solid #475569;
+        border-radius: 4px;
+        margin-bottom: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: #94a3b8;
+    }
+    
+    .leaf-item:hover {
+        background: #475569;
+        transform: translateX(5px);
+        border-color: #60a5fa;
+    }
+    
+    .leaf-item.active {
+        background: #3b82f6;
+        border-color: #60a5fa;
+        color: #e2e8f0;
+        font-weight: 500;
+    }
+    
+    .content-title {
+        color: #e2e8f0;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #334155;
+    }
+    
+    .content-body {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #cbd5e1;
+    }
+    
+    .content-body p {
+        margin-bottom: 15px;
+    }
+    
+    .empty-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        color: #64748b;
+        text-align: center;
+    }
+    
+    .empty-content i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .empty-content p {
+        font-size: 1.2rem;
+    }
+    
+    /* 美化滚动条 - 暗色主题 */
+    .sub-titles::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .sub-titles::-webkit-scrollbar-track {
+        background: #334155;
+        border-radius: 3px;
+    }
+    
+    .sub-titles::-webkit-scrollbar-thumb {
+        background: #475569;
+        border-radius: 3px;
+    }
+    
+    .sub-titles::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+    
+    /* 为内容区域添加滚动条样式 */
+    .directory::-webkit-scrollbar,
+    .content-area::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .directory::-webkit-scrollbar-track,
+    .content-area::-webkit-scrollbar-track {
+        background: #1e293b;
+    }
+    
+    .directory::-webkit-scrollbar-thumb,
+    .content-area::-webkit-scrollbar-thumb {
+        background: #475569;
+        border-radius: 4px;
+    }
+    
+    .directory::-webkit-scrollbar-thumb:hover,
+    .content-area::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+    
+    @media (max-width: 900px) {
+        .container {
+            flex-direction: column;
+        }
+        
+        .directory, .content-area {
+            width: 100%;
+        }
+        
+        .directory {
+            border-right: none;
+            border-bottom: 1px solid #475569;
+            max-height: 40vh;
+        }
+    }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+</head>
+
+
+<body>
+    <div class="container">
+        <div class="directory">
+            <h1>$\mathcal{TianYaoCelestian}$</h1>
+            <div class="main-titles" id="menu-container">
+                <!-- 目录将由JavaScript自动生成 -->
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="empty-content">
+                <i class="fas fa-book-open"></i>
+                <p>请从左侧目录选择一个主题</p>
+            </div>
+            
+            <div class="content-display" style="display: none;">
+                <h2 class="content-title" id="content-title">标题</h2>
+                <div class="content-body" id="content-body"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // === 简化的配置对象 ===
+    // 只需在这里修改配置，无需修改HTML和逻辑
+    const menuConfig = {
+        "0": {
+            title: "公式字体调试",
+            type: "leaf",
+            file: "content/latex_debug.md"
+        },
+        "1": {
+            title: "五小力学",
+            subtitle: "理论物理基础",
+            type: "folder",
+            children: {
+                "1": { 
+                    title: "力学", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "质点运动", 
+                            type: "leaf",
+                            file: "./content/mechanics/point_motion.md" 
+                        },
+                        "2": { 
+                            title: "牛顿运动定律", 
+                            type: "leaf",
+                            file: "./content/mechanics/newton_laws.md" 
+                        },
+                        "3": { 
+                            title: "守恒律", 
+                            type: "leaf",
+                            file: "./content/mechanics/conservation_laws.md" 
+                        },
+                        "4": { 
+                            title: "经典力场", 
+                            type: "leaf",
+                            file: "./content/mechanics/force_field_examples.md" 
+                        },
+                        "5": { 
+                            title: "振动与波", 
+                            type: "leaf",
+                            file: "./content/mechanics/vibration_and_wave.md" 
+                        },
+                        "6": { 
+                            title: "刚体初步", 
+                            type: "leaf",
+                            file: "./content/mechanics/preliminary_for_rigid_body.md" 
+                        },
+                        "7": { 
+                            title: "相对论", 
+                            type: "leaf",
+                            file: "./content/mechanics/relativity.md" 
+                        }
+                    }
+                },
+                "2": { 
+                    title: "光学",
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "几何光学", 
+                            type: "leaf",
+                            file: "./content/optics/geometric_optics.md" 
+                        },
+                        "2": { 
+                            title: "波动理论", 
+                            type: "leaf",
+                            file: "./content/optics/wave_theory.md" 
+                        },
+                        "3": { 
+                            title: "干涉现象", 
+                            type: "leaf",
+                            file: "./content/optics/interference_phenomena.md" 
+                        },
+                        "4": { 
+                            title: "衍射现象", 
+                            type: "leaf",
+                            file: "./content/optics/diffraction_phenomena.md" 
+                        },
+                        "5": { 
+                            title: "偏振现象", 
+                            type: "leaf",
+                            file: "./content/optics/polarization_phenomena.md" 
+                        }
+                    }
+                },
+                "3": { 
+                    title: "热学", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "分子动理论", 
+                            type: "leaf",
+                            file: "./content/thermodynamics/molecular_kinetic_theory.md" 
+                        },
+                        "2": { 
+                            title: "气体分子速率/速度理论", 
+                            type: "leaf",
+                            file: "./content/thermodynamics/gas_molecular_velocity_theory.md" 
+                        },
+                        "3": { 
+                            title: "热力学定律", 
+                            type: "leaf",
+                            file: "./content/thermodynamics/thermodynamic_laws.md" 
+                        },
+                        "4": { 
+                            title: "热力学理论应用", 
+                            type: "leaf",
+                            file: "./content/thermodynamics/thermodynamic_applications.md" 
+                        }
+                    }
+                },
+                "4": { 
+                    title: "电磁学", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "静电场", 
+                            type: "leaf",
+                            file: "./content/electromagnetism/electrostatic_field.md" 
+                        },
+                        "2": { 
+                            title: "稳恒电流", 
+                            type: "leaf",
+                            file: "./content/electromagnetism/steady_current.md" 
+                        },
+                        "3": { 
+                            title: "静磁场", 
+                            type: "leaf",
+                            file: "./content/electromagnetism/magnetostatic_field.md" 
+                        },
+                        "4": { 
+                            title: "电磁感应", 
+                            type: "leaf",
+                            file: "./content/electromagnetism/electromagnetic_induction.md" 
+                        },
+                        "5": { 
+                            title: "电磁波", 
+                            type: "leaf",
+                            file: "./content/electromagnetism/electromagnetic_waves.md" 
+                        }
+                    }
+                },
+                "5": { 
+                    title: "原子物理", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "原子结构", 
+                            type: "leaf",
+                            file: "./content/atomic_physics/atomic_structure.md" 
+                        },
+                        "2": { 
+                            title: "原子光谱", 
+                            type: "leaf",
+                            file: "./content/atomic_physics/atomic_spectra.md" 
+                        },
+                        "3": { 
+                            title: "量子力学基础", 
+                            type: "leaf",
+                            file: "./content/atomic_physics/quantum_mechanics_basics.md" 
+                        },
+                        "4": { 
+                            title: "核物理简介", 
+                            type: "leaf",
+                            file: "./content/atomic_physics/nuclear_physics_intro.md" 
+                        }
+                    }
+                }
+            }
+        },
+        "2": {
+            title: "四大力学", 
+            type: "folder",
+            children: {
+                "1": { 
+                    title: "理论力学", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "拉格朗日力学", 
+                            type: "leaf",
+                            file: "./content/theoretical_mechanics/lagrangian_mechanics.md" 
+                        },
+                        "2": { 
+                            title: "哈密顿力学", 
+                            type: "leaf",
+                            file: "./content/theoretical_mechanics/hamiltonian_mechanics.md" 
+                        },
+                        "3": { 
+                            title: "正则变换", 
+                            type: "leaf",
+                            file: "./content/theoretical_mechanics/canonical_transformation.md" 
+                        }
+                    }
+                },
+                "2": { 
+                    title: "热力学与统计物理", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "热力学基础", 
+                            type: "leaf",
+                            file: "./content/thermo_statistics/thermodynamics_foundation.md" 
+                        },
+                        "2": { 
+                            title: "统计物理原理", 
+                            type: "leaf",
+                            file: "./content/thermo_statistics/statistical_physics_principles.md" 
+                        },
+                        "3": { 
+                            title: "系综理论", 
+                            type: "leaf",
+                            file: "./content/thermo_statistics/ensemble_theory.md" 
+                        }
+                    }
+                },
+                "3": { 
+                    title: "电动力学", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "麦克斯韦方程组", 
+                            type: "leaf",
+                            file: "./content/electrodynamics/maxwell_equations.md" 
+                        },
+                        "2": { 
+                            title: "电磁波传播", 
+                            type: "leaf",
+                            file: "./content/electrodynamics/electromagnetic_wave_propagation.md" 
+                        },
+                        "3": { 
+                            title: "电磁辐射", 
+                            type: "leaf",
+                            file: "./content/electrodynamics/electromagnetic_radiation.md" 
+                        },
+                        "4": { 
+                            title: "相对论电动力学", 
+                            type: "leaf",
+                            file: "./content/electrodynamics/relativistic_electrodynamics.md" 
+                        },
+                        "5": { 
+                            title: "电磁场量子化", 
+                            type: "leaf",
+                            file: "./content/electrodynamics/quantization_electromagnetic_field.md" 
+                        }
+                    }
+                },
+                "4": { 
+                    title: "量子力学", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "波函数与薛定谔方程", 
+                            type: "leaf",
+                            file: "./content/quantum_mechanics/wave_function_schrodinger.md" 
+                        },
+                        "2": { 
+                            title: "算符与对易关系", 
+                            type: "leaf",
+                            file: "./content/quantum_mechanics/operators_commutation.md" 
+                        },
+                        "3": { 
+                            title: "角动量理论", 
+                            type: "leaf",
+                            file: "./content/quantum_mechanics/angular_momentum_theory.md" 
+                        },
+                        "4": { 
+                            title: "微扰理论", 
+                            type: "leaf",
+                            file: "./content/quantum_mechanics/perturbation_theory.md" 
+                        },
+                        "5": { 
+                            title: "散射理论", 
+                            type: "leaf",
+                            file: "./content/quantum_mechanics/scattering_theory.md" 
+                        }
+                    }
+                }
+            }
+        },
+        "3": {
+            title: "凝聚态理论",
+            type: "folder",
+            children: {
+                "1": { 
+                    title: "基础概念", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "晶体结构", 
+                            type: "leaf",
+                            file: "./content/condensed_matter/crystal_structure.md" 
+                        },
+                        "2": { 
+                            title: "能带理论", 
+                            type: "leaf",
+                            file: "./content/condensed_matter/band_theory.md" 
+                        },
+                        "3": { 
+                            title: "声子与晶格振动", 
+                            type: "leaf",
+                            file: "./content/condensed_matter/phonons_lattice_vibration.md" 
+                        }
+                    }
+                },
+                "2": { 
+                    title: "应用领域", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "半导体物理", 
+                            type: "leaf",
+                            file: "./content/condensed_matter/semiconductor_physics.md" 
+                        },
+                        "2": { 
+                            title: "超导理论", 
+                            type: "leaf",
+                            file: "./content/condensed_matter/superconductivity_theory.md" 
+                        }
+                    }
+                },
+                "3": { 
+                    title: "前沿研究", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "拓扑绝缘体", 
+                            type: "leaf",
+                            file: "./content/condensed_matter/topological_insulators.md" 
+                        },
+                        "2": { 
+                            title: "二维材料", 
+                            type: "leaf",
+                            file: "./content/condensed_matter/two_dimensional_materials.md" 
+                        },
+                        "3": { 
+                            title: "强关联电子系统", 
+                            type: "leaf",
+                            file: "./content/condensed_matter/strongly_correlated_systems.md" 
+                        },
+                        "4": { 
+                            title: "量子计算与凝聚态", 
+                            type: "leaf",
+                            file: "./content/condensed_matter/quantum_computing_condensed_matter.md" 
+                        }
+                    }
+                }
+            }
+        },
+        "4": {
+            title: "量子场论",
+            type: "folder",
+            children: {
+                "1": { 
+                    title: "自由场论", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "经典场论回顾", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/classical_field_review.md" 
+                        },
+                        "2": { 
+                            title: "标量场量子化", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/scalar_field_quantization.md" 
+                        },
+                        "3": { 
+                            title: "旋量场量子化", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/spinor_field_quantization.md" 
+                        },
+                        "4": { 
+                            title: "矢量场量子化", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/vector_field_quantization.md" 
+                        },
+                        "5": { 
+                            title: "传播子与格林函数", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/propagators_green_functions.md" 
+                        }
+                    }
+                },
+                "2": { 
+                    title: "相互作用场论", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "S矩阵理论", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/s_matrix_theory.md" 
+                        },
+                        "2": { 
+                            title: "费曼规则", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/feynman_rules.md" 
+                        },
+                        "3": { 
+                            title: "重整化理论", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/renormalization_theory.md" 
+                        }
+                    }
+                },
+                "3": { 
+                    title: "规范场论", 
+                    type: "folder",
+                    children: {
+                        "1": { 
+                            title: "规范原理", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/gauge_principle.md" 
+                        },
+                        "2": { 
+                            title: "量子电动力学", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/quantum_electrodynamics.md" 
+                        },
+                        "3": { 
+                            title: "杨-米尔斯理论", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/yang_mills_theory.md" 
+                        },
+                        "4": { 
+                            title: "标准模型简介", 
+                            type: "leaf",
+                            file: "./content/quantum_field_theory/standard_model_intro.md" 
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    // === 文件内容加载函数 ===
+    async function loadContentFile(filePath) {
+        try {
+            const response = await fetch(filePath);
+            if (!response.ok) {
+                throw new Error(`文件加载失败: ${response.status}`);
+            }
+            return await response.text();
+        } catch (error) {
+            console.error('加载内容文件时出错:', error);
+            return `# 内容加载失败\n\n无法加载文件: ${filePath}\n\n错误信息: ${error.message}`;
+        }
+    }
+
+    // === 内容显示函数 ===
+    async function displayContent(itemId, filePath, itemTitle) {
+        const emptyContent = document.querySelector('.empty-content');
+        const contentDisplay = document.querySelector('.content-display');
+        const contentTitle = document.getElementById('content-title');
+        const contentBody = document.getElementById('content-body');
+        
+        // 显示加载状态
+        contentTitle.textContent = itemTitle;
+        contentBody.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> 正在加载内容...</p>';
+        
+        emptyContent.style.display = 'none';
+        contentDisplay.style.display = 'block';
+        
+        try {
+            // 加载文件内容
+            const content = await loadContentFile(filePath);
+            contentBody.innerHTML = content;
+            
+            // 渲染数学公式
+            renderContentMath();
+            
+        } catch (error) {
+            contentBody.innerHTML = `
+                <div style="color: #e53e3e; text-align: center; padding: 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <h3>内容加载失败</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // === 重构后的目录生成函数 ===
+    function generateMenu() {
+        const container = document.getElementById('menu-container');
+        
+        function generateItems(config, level = 0, parentId = '') {
+            let html = '';
+            
+            for (const [id, item] of Object.entries(config)) {
+                const itemId = parentId ? `${parentId}-${id}` : id;
+                
+                if (item.type === 'leaf') {
+                    // 叶子项 - 直接链接到文件
+                    const itemTitle = level === 0 ? item.title : `${id} ${item.title}`;
+                    html += `<div class="leaf-item" data-id="${itemId}" data-file="${item.file}" data-title="${itemTitle}">${itemTitle}</div>`;
+                } else if (item.type === 'folder' && item.children) {
+                    // 文件夹 - 可展开
+                    const subtitleHtml = item.subtitle 
+                        ? `<br><span style="font-size: 0.9rem; color: #6b7280; font-weight: normal;">${item.subtitle}</span>`
+                        : '';
+                    
+                    const itemClass = level === 0 ? 'title-item' : 'sub-item';
+                    const itemTitle = level === 0 ? item.title : `${id} ${item.title}`;
+                    
+                    html += `
+                        <div class="${itemClass}" data-id="${itemId}">
+                            <span>${itemTitle}${subtitleHtml}</span>
+                            <i class="fas fa-chevron-right arrow"></i>
+                        </div>
+                        <div class="sub-titles" id="sub-${itemId}">
+                            ${generateItems(item.children, level + 1, itemId)}
+                        </div>
+                    `;
+                }
+            }
+            
+            return html;
+        }
+        
+        container.innerHTML = generateItems(menuConfig);
+    }
+
+    // === 动态高度计算函数 ===
+    function adjustSubTitleHeight(subTitles) {
+        const items = subTitles.querySelectorAll('.leaf-item, .sub-item');
+        const itemHeight = 45; // 每个项目的大概高度
+        const maxVisibleHeight = 400; // 最大显示高度
+        const minHeight = 100; // 最小高度
+        
+        let calculatedHeight = items.length * itemHeight;
+        
+        // 限制在最小和最大高度之间
+        calculatedHeight = Math.max(minHeight, Math.min(calculatedHeight, maxVisibleHeight));
+        
+        subTitles.style.maxHeight = calculatedHeight + 'px';
+    }
+
+    // === 事件绑定函数 ===
+    function bindEvents() {
+        // 为文件夹项添加点击事件 - 实现互斥展开
+        document.querySelectorAll('.title-item, .sub-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const subTitles = document.getElementById(`sub-${id}`);
+                
+                if (subTitles) {
+                    // 如果当前标题已展开，则关闭它
+                    if (subTitles.classList.contains('expanded')) {
+                        subTitles.classList.remove('expanded');
+                        this.classList.remove('active');
+                        const arrow = this.querySelector('.arrow');
+                        arrow.classList.replace('fa-chevron-down', 'fa-chevron-right');
+                        // 收起时重置高度
+                        setTimeout(() => {
+                            subTitles.style.maxHeight = '0px';
+                        }, 10);
+                    } else {
+                        // 关闭所有其他同级已展开的标题
+                        const parent = this.parentElement;
+                        const siblings = parent.querySelectorAll('.title-item, .sub-item');
+                        siblings.forEach(sibling => {
+                            if (sibling !== this) {
+                                const siblingId = sibling.getAttribute('data-id');
+                                const siblingSubTitles = document.getElementById(`sub-${siblingId}`);
+                                if (siblingSubTitles && siblingSubTitles.classList.contains('expanded')) {
+                                    siblingSubTitles.classList.remove('expanded');
+                                    sibling.classList.remove('active');
+                                    const siblingArrow = sibling.querySelector('.arrow');
+                                    siblingArrow.classList.replace('fa-chevron-down', 'fa-chevron-right');
+                                    // 收起时重置高度
+                                    setTimeout(() => {
+                                        siblingSubTitles.style.maxHeight = '0px';
+                                    }, 10);
+                                }
+                            }
+                        });
+                        
+                        // 展开当前标题
+                        subTitles.classList.add('expanded');
+                        this.classList.add('active');
+                        const arrow = this.querySelector('.arrow');
+                        arrow.classList.replace('fa-chevron-right', 'fa-chevron-down');
+                        // 展开时动态调整高度
+                        setTimeout(() => adjustSubTitleHeight(subTitles), 10);
+                    }
+                }
+            });
+        });
+
+        // 为叶子项添加点击事件
+        document.querySelectorAll('.leaf-item').forEach(item => {
+            item.addEventListener('click', async function() {
+                document.querySelectorAll('.leaf-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                const itemId = this.getAttribute('data-id');
+                const filePath = this.getAttribute('data-file');
+                const itemTitle = this.getAttribute('data-title');
+                
+                await displayContent(itemId, filePath, itemTitle);
+            });
+        });
+    }
+
+    // === 改进的数学公式渲染函数 ===
+    function renderMathFormulas() {
+        if (typeof renderMathInElement !== 'undefined') {
+            // 渲染整个页面的数学公式
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\[', right: '\\]', display: true},
+                    {left: '\\(', right: '\\)', display: false}
+                ],
+                throwOnError: false,
+                output: 'html',
+                strict: false
+            });
+        }
+    }
+
+    // === 专门渲染内容区域的数学公式 ===
+    function renderContentMath() {
+        if (typeof renderMathInElement !== 'undefined') {
+            const contentBody = document.getElementById('content-body');
+            if (contentBody) {
+                renderMathInElement(contentBody, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\[', right: '\\]', display: true},
+                        {left: '\\(', right: '\\)', display: false}
+                    ],
+                    throwOnError: false,
+                    output: 'html',
+                    strict: false
+                });
+            }
+        }
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        generateMenu();      // 生成目录
+        bindEvents();        // 绑定事件
+        renderMathFormulas(); // 渲染公式
+    });
+</script>
+
+</body>
+</html>
