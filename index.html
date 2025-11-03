@@ -102,13 +102,26 @@
     }
     
     .sub-titles {
-        margin-left: 20px;
-        margin-top: 10px;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.5s ease;
-        overflow-y: auto;
-    }
+    margin-left: 25px;  /* 从 20px 增加到 25px */
+    margin-top: 10px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+    overflow-y: auto;
+}
+
+/* 为更深层级的子标题增加更多缩进 */
+.sub-titles .sub-titles {
+    margin-left: 35px;  /* 第二级子标题缩进 */
+}
+
+.sub-titles .sub-titles .sub-titles {
+    margin-left: 45px;  /* 第三级子标题缩进 */
+}
+
+.sub-titles .sub-titles .sub-titles .sub-titles {
+    margin-left: 55px;  /* 第四级子标题缩进 */
+}
     
     .sub-titles.expanded {
         /* 高度由JavaScript动态计算 */
@@ -143,7 +156,7 @@
     }
     
     .leaf-item {
-        padding: 10px 15px 10px 30px;
+        padding: 10px 15px 10px 40px;
         background: #334155;
         border: 1px solid #475569;
         border-radius: 4px;
@@ -153,6 +166,19 @@
         color: #94a3b8;
     }
     
+    /* 为更深层级的叶子项增加更多缩进 */
+    .sub-titles .leaf-item {
+    padding-left: 50px;  /* 第二级叶子项 */
+    }
+
+    .sub-titles .sub-titles .leaf-item {
+    padding-left: 60px;  /* 第三级叶子项 */
+    }
+
+    .sub-titles .sub-titles .sub-titles .leaf-item {
+    padding-left: 70px;  /* 第四级叶子项 */
+    }
+
     .leaf-item:hover {
         background: #475569;
         transform: translateX(5px);
@@ -271,7 +297,10 @@
 <body>
     <div class="container">
         <div class="directory">
-            <h1>$\mathcal{TianYaoCelestian}$</h1>
+            <div id="site-header">
+                <h1 id="site-title">$\mathcal{TianYaoCelestian}$</h1>
+                <div id="site-subtitle" style="font-size: 1.1rem; color: #cbd5e1; margin-top: 5px;"></div>
+            </div>
             <div class="main-titles" id="menu-container">
                 <!-- 目录将由JavaScript自动生成 -->
             </div>
@@ -291,8 +320,13 @@
     </div>
 
 <script>
+// === 站点配置 ===
+const siteConfig = {
+    siteTitle: "$\\mathcal{TianYaoCelestian}$",
+    
+};
     // === 简化的配置对象 ===
-    // 只需在这里修改配置，无需修改HTML和逻辑
+
     const menuConfig = {
         "0": {
             title: "公式字体调试",
@@ -483,6 +517,22 @@
                             title: "正则变换", 
                             type: "leaf",
                             file: "./content/theoretical_mechanics/canonical_transformation.md" 
+                        },
+                        "4": {
+                        title:"text",
+                        type:"folder",
+                         children:{
+                            "1":{
+                                title:"111",
+                                type:"leaf",
+                                file:"./content/mathematical_foundation/text/111.md",
+                                },
+                            "2":{
+                                title:"222",
+                                type:"leaf",
+                                file:"./content/mathematical_foundation/text/222.md",
+                                }
+                            }
                         }
                     }
                 },
@@ -572,43 +622,43 @@
             }
         },
         "3": {
-            title:"数学基础",
-            type:"folder",
-            children:{
-                "1":{
-                    title:"数学分析",
-                    type:"folder",
-                    childern:{
-                        "1":{
-                            title:"微分",
-                            type:"leaf",
-                            file:"./content/mathbase/math_analysis/differential.md"
-                        },
-                        "2":{
-                            title:"积分",
-                            type:"leaf",
-                            file:"./content/mathbase/math_analysis/integration.md"
-                        }
-                    }           
-                }
-                 "2":{
-                    title:"线性代数",
-                    type:"folder",
-                    childern:{
-                        "1":{
-                            title:"行列式",
-                            type:"leaf",
-                            file:"./content/mathbase/linear_algebra/determinate.md"
-                        },
-                        "2":{
-                            title:"线性空间",
-                            type:"leaf",
-                            file:"./content/mathbase/linear_algebra/linear_space.md"
-                        }
-                    }           
-                }
-            }
-        },
+        title: "数学基础",
+        type: "folder",
+        children: {
+            "1": { 
+                title: "数学分析", 
+                type: "leaf",
+                file: "./content/mathematical_foundation/mathematical_analysis.md" 
+            },
+            "2": { 
+                title: "线性代数", 
+                type: "leaf",
+                file: "./content/mathematical_foundation/linear_algebra.md" 
+            },
+            "3": { 
+                title: "张量分析", 
+                type: "leaf",
+                file: "./content/mathematical_foundation/tensor_analysis.md" 
+            },
+            "4": { 
+                title: "实分析", 
+                type: "leaf",
+                file: "./content/mathematical_foundation/real_analysis.md" 
+            },
+            "5": { 
+                title: "泛函分析", 
+                type: "leaf",
+                file: "./content/mathematical_foundation/functional_analysis.md" 
+            },
+            "6": { 
+                title: "群论", 
+                type: "leaf",
+                file: "./content/mathematical_foundation/group_theory.md" 
+            },
+            
+            // 如果需要添加更多，继续使用 "7", "8" 等
+        }
+    },
         "4": {
             title: "凝聚态理论",
             type: "folder",
@@ -761,7 +811,29 @@
                     }
                 }
             }
+        },
+        "6": {
+        title: "广义相对论",
+        type: "folder",
+        children: {
+            "1": { 
+                title: "张量分析基础", 
+                type: "leaf",
+                file: "./content/general_relativity/tensor_analysis.md" 
+            },
+            "2": { 
+                title: "爱因斯坦场方程", 
+                type: "leaf",
+                file: "./content/general_relativity/einstein_field_equations.md" 
+            },
+            "3": { 
+                title: "黑洞物理", 
+                type: "leaf",
+                file: "./content/general_relativity/black_hole_physics.md" 
+            }
+            
         }
+    }
     };
 
     // === 文件内容加载函数 ===
@@ -974,12 +1046,23 @@
 
     // 初始化
     document.addEventListener('DOMContentLoaded', function() {
-        generateMenu();      // 生成目录
-        bindEvents();        // 绑定事件
-        renderMathFormulas(); // 渲染公式
+    // 设置站点标题和副标题
+    const siteTitleElement = document.getElementById('site-title');
+    const siteSubtitleElement = document.getElementById('site-subtitle');
+    
+    if (siteTitleElement && siteConfig.siteTitle) {
+        siteTitleElement.innerHTML = siteConfig.siteTitle;
+    }
+    
+    if (siteSubtitleElement && siteConfig.siteSubtitle) {
+        siteSubtitleElement.textContent = siteConfig.siteSubtitle;
+    }
+    
+    generateMenu();      // 生成目录
+    bindEvents();        // 绑定事件
+    renderMathFormulas(); // 渲染公式
     });
 </script>
 
 </body>
-
 </html>
